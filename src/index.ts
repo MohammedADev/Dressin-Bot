@@ -33,6 +33,7 @@ async function scrape(): Promise<void> {
     await page.click(
       "xpath=/html/body/div[1]/div/div[2]/div[2]/div[2]/div[5]/div"
     );
+    await page.waitForTimeout(7000);
     await page.waitForLoadState("networkidle");
     await takeScreenshot(page, "after_redirect.png");
 
