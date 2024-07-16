@@ -90,9 +90,38 @@ async function selectProductOptions(page: Page): Promise<void> {
   await page.waitForTimeout(1000); // Add a delay between selections
   await waitForSelectorAndClick(
     page,
+    "xpath=/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[3]/div/div[2]/div[2]/ul/div/div/input"
+  );
+  console.log("Clicked second option");
+  await waitForSelectorAndClick(
+    page,
     "xpath=/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div[1]/div[3]/div/div[2]/div[2]/ul/div/ul/li[3]"
   );
   console.log("Selected second option");
+}
+
+async function closeModalIfPresent(page: Page): Promise<void> {
+  const MODAL_CLOSE_XPATHS = [
+    "xpath=/html/body/div[1]/div[7]/div/div/div[1]/div",
+    "xpath=/html/body/div[1]/div[4]/div[1]/form/div[4]/div[3]/div[3]/div/div[4]/div[1]",
+  ];
+  for (const xpath of MODAL_CLOSE_XPATHS) {
+    try {
+      const modalCloseButton = await page.$(xpath);
+      if (modalCloseButton) {
+        console.log("Modal detected. Attempting to close...");
+        await modalCloseButton.click();
+        await page.waitForTimeout(1000); // Wait for modal to close
+        console.log("Modal closed successfully.");
+        return; // Exit the function after closing the modal
+      }
+    } catch (error) {
+      console.warn(
+        `Error while trying to close modal using xpath ${xpath}:`,
+        error
+      );
+    }
+  }
 }
 
 async function addToCart(page: Page): Promise<void> {
@@ -103,7 +132,34 @@ async function addToCart(page: Page): Promise<void> {
   console.log("Clicked Add to Cart button");
   await page.waitForLoadState("networkidle");
   console.log("Waiting for redirection");
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(2000);
+}
+
+async function fillCheckoutForm(page: Page): Promise<void> {
+  await typeWithDelay(
+    page,
+    "xpath=/html/body/div[1]/div[2]/div[2]/div/div[2]/div/div[3]/div/form/div[1]/div[1]/input",
+    getEnvVariable("FIRST_NAME")
+  );
+  await typeWithDelay(
+    page,
+    "xpath=/html/body/div[1]/div[2]/div[2]/div/div[2]/div/div[3]/div/form/div[1]/div[2]/input",
+    getEnvVariable("LAST_NAME")
+  );
+  await typeWithDelay(
+    page,
+    '//*[@id="addressAutocomplete"]',
+    getEnvVariable("ADDRESS")
+  );
+  await page.waitForTimeout(1000); // Wait for suggestions to appear
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(1000); // Wait for the selection to be applied
+  await typeWithDelay(
+    page,
+    "xpath=/html/body/div[1]/div[2]/div[2]/div/div[2]/div/div[3]/div/form/div[1]/div[9]/input",
+    getEnvVariable("PHONE")
+  );
 }
 
 async function scrape(): Promise<void> {
@@ -141,8 +197,8 @@ async function scrape(): Promise<void> {
     // continue button
     await page.click(
       "xpath=/html/body/div[1]/div/div[2]/div[2]/div[2]/div[5]/div"
-    ),
-      await page.waitForLoadState("networkidle");
+    );
+    await page.waitForLoadState("networkidle");
 
     await takeScreenshot(page, "after_redirect.png");
     await page.waitForTimeout(7000); // Add a delay between selections
@@ -157,12 +213,70 @@ async function scrape(): Promise<void> {
       "https://www.dressin.com/products/solid-round-neck-knit-t-shirt-p25180",
       { timeout: 60000 }
     );
+    await page.waitForTimeout(3000); // Add a delay between selections
+    await closeModalIfPresent(page);
     await page.waitForLoadState("networkidle");
     console.log("Product page loaded");
-
     await selectProductOptions(page);
     await addToCart(page);
-    await takeScreenshot(page, "after_product_selection.png");
+    await page.waitForTimeout(4000); // Add a delay between selections
+    await page.goto("https://www.dressin.com/checkout/cart");
+    await page.waitForTimeout(7000); // Add a delay between selections
+    await page.waitForLoadState("networkidle");
+    console.log("Checkout page loaded");
+
+    await waitForSelectorAndClick(
+      page,
+      "xpath=/html/body/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[3]/div/button",
+      60000
+    );
+    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
+    console.log("Checkout address page loaded");
+
+    await fillCheckoutForm(page);
+
+    // Click next button
+    await waitForSelectorAndClick(
+      page,
+      "xpath=/html/body/div[1]/div[2]/div[2]/div/div[2]/div/div[3]/div/form/div[4]/span"
+    );
+    await page.waitForLoadState("networkidle");
+
+    // Wait for and handle random modal
+    closeModalIfPresent(page);
+
+    // Select standard shipping
+    await waitForSelectorAndClick(
+      page,
+      "xpath=/html/body/div[1]/div[4]/div[1]/form/div[1]/ul/li[1]"
+    );
+    await page.waitForLoadState("networkidle");
+
+    // Use points
+    await waitForSelectorAndClick(
+      page,
+      "xpath=/html/body/div[1]/div[4]/div[1]/form/div[3]/div[2]/div[1]/div[3]/span"
+    );
+    await page.waitForLoadState("networkidle");
+
+    // Select credit card
+    await waitForSelectorAndClick(
+      page,
+      "xpath=/html/body/div[1]/div[4]/div[1]/form/div[4]/ul/li[1]"
+    );
+    await page.waitForLoadState("networkidle");
+
+    // Place order
+    await waitForSelectorAndClick(
+      page,
+      'xpath=//*[@id="onestepcheckout-place-order"]'
+    );
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
+
+    console.log("Order placed successfully");
+    await takeScreenshot(page, "order_confirmation.png");
   } catch (error) {
     console.error("An error occurred:", error);
     if (page) {
