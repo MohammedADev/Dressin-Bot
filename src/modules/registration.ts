@@ -2,8 +2,8 @@ import { Page } from "playwright";
 import { typeWithDelay, waitForSelectorAndClick } from "../utils/page-actions";
 import { RandomEmail } from "../utils/algo";
 import { RegistrationFormData, PageAction } from "../types";
-import { getUserInput } from "../utils/input";
 import { getEnvVariable } from "../utils/getEnv";
+import { waitForEmail } from "./verify-email";
 
 export const fillRegistrationForm: PageAction = async (
   page: Page
@@ -34,8 +34,15 @@ export const fillRegistrationForm: PageAction = async (
 export async function verifyEmail(page: Page): Promise<void> {
   await waitForSelectorAndClick(page, 'xpath=//*[@id="verifyEmail"]', 60000);
   console.log("Clicked email verification button");
-  await getUserInput(
-    "Please verify your email manually. Press Enter when done..."
-  );
-  console.log("Continuing after manual email verification");
+  await waitForEmail()
+    .then((confirmationLink) => {
+      if (confirmationLink) {
+        console.log("Email confirmation link:", confirmationLink);
+      } else {
+        console.log("No confirmation link found within the timeout period.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error in email verification process:", error);
+    });
 }

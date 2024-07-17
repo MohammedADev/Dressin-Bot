@@ -6,5 +6,5 @@ export const config: ScraperConfig = {
   INITIAL_URL:
     "https://www.dressin.com/sharedpage?aicode=vtfG1yUM&app_name=app&share=copy_url",
   PRODUCT_URL:
-    "https://www.dressin.com/products/solid-round-neck-knit-t-shirt-p25180",
+    "https://www.dressin.com/products/floral-wrinkle-v-neck-flare-blouse-p16617",
 };
