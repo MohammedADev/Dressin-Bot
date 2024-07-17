@@ -1,3 +1,5 @@
+import { getEnvVariable } from "./getEnv";
+
 export function RandomEmail(): string {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let email = "";
@@ -5,7 +7,7 @@ export function RandomEmail(): string {
   for (let i = 0; i < 10; i++) {
     email += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return email + "@mohammedabdelaziz.com";
+  return email + getEnvVariable("CATCHALL");
 }
 
 export function RandomName(): string {
