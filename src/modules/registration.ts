@@ -36,7 +36,7 @@ export async function verifyEmail(page: Page): Promise<void> {
   console.log("Clicked email verification button");
   await waitForEmail()
     .then((confirmationLink) => {
-      if (confirmationLink) {
+      if (confirmationLink !== undefined) {
         console.log("Email confirmation link:", confirmationLink);
       } else {
         console.log("No confirmation link found within the timeout period.");

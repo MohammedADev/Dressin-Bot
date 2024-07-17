@@ -2,7 +2,7 @@ import { check_inbox, Email } from "gmail-tester";
 import path from "path";
 import fs from "fs";
 import { google } from "googleapis";
-import { chromium, Browser, Page } from "playwright";
+import { chromium } from "playwright";
 
 const CREDENTIALS_PATH = path.resolve(
   __dirname,
@@ -27,11 +27,12 @@ async function refreshToken() {
     client_secret,
     redirect_uris[0]
   );
+
   try {
     const token = fs.readFileSync(GMAIL_TOKEN_PATH, "utf-8");
     oAuth2Client.setCredentials(JSON.parse(token));
-    const newToken = await oAuth2Client.refreshAccessToken();
-    fs.writeFileSync(GMAIL_TOKEN_PATH, JSON.stringify(newToken.credentials));
+    const { credentials: newToken } = await oAuth2Client.refreshAccessToken();
+    fs.writeFileSync(GMAIL_TOKEN_PATH, JSON.stringify(newToken));
     console.log("Token refreshed and saved.");
   } catch (error) {
     console.error("Error refreshing token:", error);
@@ -39,62 +40,72 @@ async function refreshToken() {
   }
 }
 
-async function clickConfirmationLink(link: string) {
+async function verifyEmailWithPlaywright(
+  verificationLink: string
+): Promise<void> {
   const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
+
   try {
-    await page.goto(link);
-    console.log("Clicked confirmation link:", link);
+    // Navigate directly to the verification link
+    await page.goto(verificationLink);
+
+    // Wait for the page to load
+    await page.waitForLoadState("networkidle");
+
+    console.log("Navigated to verification link");
+
+    // Add additional steps if necessary, such as clicking a confirm button
+    // Wait for a moment to ensure the verification is complete
+    await page.waitForTimeout(5000);
   } catch (error) {
-    console.error("Error clicking confirmation link:", error);
+    console.error("Error during email verification:", error);
+    throw error;
   } finally {
     await browser.close();
   }
 }
 
 export async function waitForEmail(
-  maxWaitTime: number = 300000, // 5 minutes
-  checkInterval: number = 10000 // 10 seconds
-): Promise<string | null> {
+  maxWaitTime: number = 300000,
+  checkInterval: number = 10000
+): Promise<void> {
   const startTime = Date.now();
   const startDate = new Date();
-  const processedLinks = new Set<string>();
 
   while (Date.now() - startTime < maxWaitTime) {
     try {
       await refreshToken();
-      const messages = await check_inbox(credentials, GMAIL_TOKEN_PATH, {
-        subject: "Verify your DRESSIN email",
-        from: "systems@dressin.com",
-        include_body: true,
-        after: startDate,
-        wait_time_sec: 10,
-        max_wait_time_sec: 30,
-      });
+      const messages: Email[] = await check_inbox(
+        credentials,
+        GMAIL_TOKEN_PATH,
+        {
+          subject: "Verify your DRESSIN email",
+          from: "systems@dressin.com",
+          include_body: true,
+          after: startDate,
+          wait_time_sec: 10,
+          max_wait_time_sec: 30,
+        }
+      );
 
       if (messages.length > 0) {
         console.log(`Found ${messages.length} message(s)`);
-        for (const message of messages) {
-          const emailBody = message.body?.html || message.body?.text;
-          if (emailBody) {
-            console.log("Email body:", emailBody); // Log the email body for debugging
-            const confirmationLink = findConfirmationLink(emailBody);
-            if (confirmationLink) {
-              console.log("Found confirmation link:", confirmationLink);
-              if (!processedLinks.has(confirmationLink)) {
-                console.log("Processing new confirmation link");
-                processedLinks.add(confirmationLink);
-                await clickConfirmationLink(confirmationLink);
-                return confirmationLink;
-              } else {
-                console.log("Skipping already processed confirmation link");
-              }
-            } else {
-              console.log("No valid confirmation link found in this email");
-            }
+        const latestMessage = messages[0]; // Assume the first message is the latest
+
+        const emailBody = latestMessage.body?.html || latestMessage.body?.text;
+        if (emailBody) {
+          const verificationLink = extractVerificationLink(emailBody);
+          if (verificationLink) {
+            console.log("Attempting to verify email");
+            await verifyEmailWithPlaywright(verificationLink);
+            console.log("Email verification completed");
+            return;
           } else {
-            console.log("Email body is empty");
+            console.log("Verification link not found in email body");
           }
+        } else {
+          console.log("Email body is empty");
         }
       } else {
         console.log(
@@ -109,13 +120,13 @@ export async function waitForEmail(
     }
   }
 
-  console.log("Timeout reached. No confirmation email found.");
-  return null;
+  console.log("Timeout reached. No confirmation email found or verified.");
 }
 
-function findConfirmationLink(emailBody: string): string | null {
-  const confirmationLinkMatch = emailBody?.match(
-    /https:\/\/links\.newsletter\.dressin\.com[^\s"]*/
-  );
-  return confirmationLinkMatch ? confirmationLinkMatch[0] : null;
+function extractVerificationLink(emailBody: string): string | null {
+  // Relaxed regex to capture the URL with ?u= parameter
+  const linkRegex = /https:\/\/links\.newsletter\.dressin\.com[^"]+\?u=[^"]+/;
+  const match = emailBody.match(linkRegex);
+  console.log("found match");
+  return match ? match[0] : null;
 }
