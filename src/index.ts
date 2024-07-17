@@ -6,6 +6,7 @@ import { fillRegistrationForm, verifyEmail } from "./modules/registration";
 import { selectProductOptions, addToCart } from "./modules/product-selection";
 import { fillCheckoutForm, completeCheckout } from "./modules/checkout";
 import { closeModalIfPresent } from "./modules/modal-handler";
+import { infiniteScrape } from "./utils/retry";
 import { retry } from "./utils/retry";
 
 async function scrape(): Promise<void> {
@@ -13,7 +14,7 @@ async function scrape(): Promise<void> {
   let page: Page | null = null;
 
   try {
-    browser = await chromium.launch({ headless: false });
+    browser = await chromium.launch({ headless: true });
     page = await browser.newPage({ viewport: { height: 1080, width: 1920 } });
 
     await page.goto(config.INITIAL_URL);
@@ -95,10 +96,8 @@ async function scrape(): Promise<void> {
   }
 }
 
-// Main execution with retry
-retry(scrape, 3, 10000)
-  .then(() => console.log("Scraping completed successfully"))
-  .catch((error) => {
-    console.error("Scraping failed after all retries:", error);
-    process.exit(1);
-  });
+// Main execution
+infiniteScrape(scrape, 3, 10000, 60000).catch((error) => {
+  console.error("Unhandled error in infiniteScrape:", error);
+  process.exit(1);
+});
