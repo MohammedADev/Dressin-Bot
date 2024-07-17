@@ -43,7 +43,7 @@ async function refreshToken() {
 async function verifyEmailWithPlaywright(
   verificationLink: string
 ): Promise<void> {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
 
   try {

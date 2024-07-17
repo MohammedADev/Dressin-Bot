@@ -4,7 +4,11 @@ import { takeScreenshot } from "./utils/screenshot";
 import { waitForSelectorAndClick } from "./utils/page-actions";
 import { fillRegistrationForm, verifyEmail } from "./modules/registration";
 import { selectProductOptions, addToCart } from "./modules/product-selection";
-import { fillCheckoutForm, completeCheckout } from "./modules/checkout";
+import {
+  fillCheckoutForm,
+  completeCheckout,
+  cancelOrder,
+} from "./modules/checkout";
 import { closeModalIfPresent } from "./modules/modal-handler";
 import { infiniteScrape } from "./utils/retry";
 import { retry } from "./utils/retry";
@@ -14,7 +18,7 @@ async function scrape(): Promise<void> {
   let page: Page | null = null;
 
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: false });
     page = await browser.newPage({ viewport: { height: 1080, width: 1920 } });
 
     await page.goto(config.INITIAL_URL);
@@ -80,7 +84,11 @@ async function scrape(): Promise<void> {
 
     await retry(() => closeModalIfPresent(page!));
     await retry(() => completeCheckout(page!));
-
+    await page.waitForTimeout(2000);
+    await page!.goto(
+      "https://www.dressin.com/customer/order?order_status=customer_order_all"
+    );
+    await retry(() => cancelOrder(page!));
     await takeScreenshot(page!, "order_confirmation.png");
   } catch (error) {
     console.error("An error occurred:", error);

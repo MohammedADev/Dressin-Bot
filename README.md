@@ -15,13 +15,13 @@ This script is designed to automate the process of placing an order on Dressin.c
 
 - Node.js installed on the system
 - Puppeteer library installed (run `npm install puppeteer` to install)
-- Environment variables for FIRST_NAME, LAST_NAME, ADDRESS, PHONE, and PASSWORD set
+- Environment variables for FIRST_NAME, LAST_NAME, ADDRESS, PHONE, PASSWORD, CITY, ZIP_CODE, CLIENT_ID, CLIENT_SECRET, and REDIRECT_URIS set
 
 ## How to Run
 
 1. Clone the repository and navigate to the project directory.
 2. Install the required dependencies by running `npm install`.
-3. Set the environment variables for FIRST_NAME, LAST_NAME, ADDRESS, PHONE, and PASSWORD.
+3. Set the environment variables for FIRST_NAME, LAST_NAME, ADDRESS, PHONE, PASSWORD, CITY, ZIP_CODE, CLIENT_ID, CLIENT_SECRET, and REDIRECT_URIS.
 4. Run the script using `node index.ts`.
 
 ## Note
