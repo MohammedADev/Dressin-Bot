@@ -13,7 +13,7 @@ if %errorlevel% equ 0 (
 :: Function to install Node.js
 :install_node
 echo Node.js is not installed. Installing Node.js...
-powershell -Command "Invoke-WebRequest https://nodejs.org/dist/v18.16.0/node-v18.16.0-x64.msi -OutFile node_installer.msi"
+powershell -Command "Invoke-WebRequest https://nodejs.org/dist/v20.15.1/node-v20.15.1-x64.msi -OutFile node_installer.msi"
 msiexec /i node_installer.msi /qn
 del node_installer.msi
 echo Node.js has been installed successfully.
@@ -115,12 +115,16 @@ if /i "%answer%" equ "yes" (
     echo Please create your own .env file.
 )
 
+:: Create directories if necessary
+if not exist "src\screenshots" mkdir "src\screenshots"
+if not exist "src\gmail-tester" mkdir "src\gmail-tester"
+
 echo After completing the OAuth signup process:
 echo 1. Download the credentials file.
 echo 2. Rename it to 'credentials.json'
 echo 3. Move it to the 'gmail-tester' folder.
 
-if exist "gmail-tester\credentials.json" (
+if exist "src\gmail-tester\credentials.json" (
     npx ts-node src/modules/generate-token.ts
 
     echo After authorizing your Google account, you'll be redirected to a URL.
@@ -137,7 +141,7 @@ if exist "gmail-tester\credentials.json" (
     
     pause
 ) else (
-    echo credentials.json not found in the gmail-tester folder. Please add it before proceeding.
+    echo credentials.json not found in the src\gmail-tester folder. Please add it before proceeding.
 )
 
 :: Start the application
