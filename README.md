@@ -76,4 +76,4 @@ Contributions to improve the script or extend its capabilities are welcome. Plea
 
 ## License
 
-This project is open-source and available under the ISC License.
+This project is open-source and available under the BSD 3-Clause License with the Commons Clause License.
