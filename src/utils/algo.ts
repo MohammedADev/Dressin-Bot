@@ -7,7 +7,9 @@ export function RandomEmail(): string {
   for (let i = 0; i < 10; i++) {
     email += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return email + getEnvVariable("CATCHALL");
+  const fullEmail = email + getEnvVariable("CATCHALL");
+  console.log(fullEmail);
+  return fullEmail;
 }
 
 export function RandomName(): string {

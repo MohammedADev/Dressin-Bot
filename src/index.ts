@@ -18,7 +18,7 @@ async function scrape(): Promise<void> {
   let page: Page | null = null;
 
   try {
-    browser = await chromium.launch({ headless: false });
+    browser = await chromium.launch({ headless: true });
     page = await browser.newPage({ viewport: { height: 1080, width: 1920 } });
 
     await page.goto(config.INITIAL_URL);
@@ -88,7 +88,7 @@ async function scrape(): Promise<void> {
     await page!.goto(
       "https://www.dressin.com/customer/order?order_status=customer_order_all"
     );
-    await retry(() => cancelOrder(page!));
+    // await retry(() => cancelOrder(page!));
     await takeScreenshot(page!, "order_confirmation.png");
   } catch (error) {
     console.error("An error occurred:", error);

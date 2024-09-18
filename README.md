@@ -1,29 +1,79 @@
 # Dressin.com Automation Script
 
-This script is designed to automate the process of placing an order on Dressin.com. It simulates user interactions to navigate through the website, select products, fill out forms, and complete the checkout process.
+This project is an automated script designed to simulate user interactions on Dressin.com, demonstrating proficiency in web automation and e-commerce processes.
 
-## Features
+## Technologies Used
 
-- Registers a new user with a random email and password
-- Verifies the email manually
-- Selects a product and adds it to the cart
-- Proceeds to checkout and fills out the checkout form
-- Selects standard shipping and uses points
-- Places the order using a credit card
+- **Node.js**: The core runtime environment for the script.
+- **TypeScript**: Used for adding static typing to the JavaScript code, enhancing code quality and maintainability.
+- **Playwright**: A powerful library for browser automation, used to interact with web elements and simulate user actions.
+- **Dotenv**: For managing environment variables securely.
+- **Google APIs**: Utilized for potential email verification or other Google-related functionalities.
 
-## Requirements
+## Key Features
 
-- Node.js installed on the system
-- Puppeteer library installed (run `npm install puppeteer` to install)
-- Environment variables for FIRST_NAME, LAST_NAME, ADDRESS, PHONE, PASSWORD, CITY, ZIP_CODE, CLIENT_ID, CLIENT_SECRET, and REDIRECT_URIS set
+- User Registration: Automates the process of creating a new user account with random credentials.
+- Email Verification: Implements a manual email verification step.
+- Product Selection: Automatically selects a product and adds it to the cart.
+- Checkout Process: Simulates the entire checkout flow, including form filling and shipping selection.
+- Payment Simulation: Demonstrates the ability to handle complex e-commerce transactions.
 
-## How to Run
+## Technical Highlights
 
-1. Clone the repository and navigate to the project directory.
-2. Install the required dependencies by running `npm install`.
-3. Set the environment variables for FIRST_NAME, LAST_NAME, ADDRESS, PHONE, PASSWORD, CITY, ZIP_CODE, CLIENT_ID, CLIENT_SECRET, and REDIRECT_URIS.
-4. Run the script using `node index.ts`.
+- **Asynchronous Programming**: Leverages Node.js's asynchronous capabilities for efficient web interactions.
+- **Browser Automation**: Utilizes Playwright for cross-browser testing and interaction simulation.
+- **Environment Variable Management**: Implements secure handling of sensitive information using dotenv.
+- **TypeScript Integration**: Enhances code reliability and developer experience with static typing.
 
-## Note
+## Setup and Execution
 
-This script is for demonstration purposes only and should not be used for actual purchases without the consent of the website owners. Additionally, the script may need to be updated if the website structure or functionality changes.
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/ICEPrey/Dressin-Bot
+   cd Dressin-Bot
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Configure environment variables:
+   Create a `.env` file in the project root and add the following variables:
+
+   ```bash
+   FIRST_NAME=
+   LAST_NAME=
+   ADDRESS=
+   PHONE=
+   PASSWORD=
+   CITY=
+   ZIP_CODE=
+   CLIENT_ID=
+   CLIENT_SECRET=
+   REDIRECT_URIS=
+   ```
+
+4. Run the script:
+   ```bash
+   npm run dev
+   ```
+
+## Development Tools
+
+- **ts-node**: For executing TypeScript files directly.
+- **Gmail Tester**: A development dependency, used for automatically verifying email addresses.
+
+## Note on Usage
+
+This script is intended for demonstration and educational purposes only. It showcases skills in web automation, e-commerce process simulation, and handling of complex web interactions. The script should not be used for actual purchases without explicit permission from the website owners.
+
+## Contributing
+
+Contributions to improve the script or extend its capabilities are welcome. Please feel free to submit pull requests or open issues for discussion.
+
+## License
+
+This project is open-source and available under the ISC License.

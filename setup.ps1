@@ -62,7 +62,7 @@ npm install
 
 # Create .env file
 $answer = Read-Host "Do you want to use the default .env (config) file? (yes/no)"
-if ($answer -eq "yes") {
+if ($answer -eq "yes" -or $answer -eq "y") {
     $env:FIRST_NAME = Get-ValidatedInput "Enter your first name: " { $true }
     $env:LAST_NAME = Get-ValidatedInput "Enter your last name: " { $true }
     $env:ADDRESS = Get-ValidatedInput "Enter your address: " { $true }
